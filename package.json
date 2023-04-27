@@ -4,11 +4,14 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "turbo run format",
+    "prepare": "husky install",
+    "pre-commit": "npm run lint && npm run format"
   },
   "devDependencies": {
+    "@node-challenge/eslint-config": "*",
     "eslint": "^7.32.0",
-    "eslint-config-custom": "*",
+    "husky": "8.0.3",
     "prettier": "^2.5.1",
     "turbo": "latest"
   },

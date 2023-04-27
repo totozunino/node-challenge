@@ -1,0 +1,7 @@
+{
+  "extends": "@node-challenge/tsconfig/nestjs.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./"
+  }
+}
