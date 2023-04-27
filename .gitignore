@@ -17,6 +17,7 @@ build
 .DS_Store
 *.pem
 .tool-versions
+database.sqlite
 
 # debug
 npm-debug.log*
