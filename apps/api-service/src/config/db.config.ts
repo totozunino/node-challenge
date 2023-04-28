@@ -8,7 +8,6 @@ export default registerAs(DB_CONFIG, () => {
   return {
     type: process.env.DB_TYPE as DatabaseType,
     database: process.env.DB_NAME,
-    entities: ['./entities/*.entity.ts'],
-    migrations: ['src/db/migrations/*.ts'],
+    entities: [__dirname + '/../**/*.entity.{js,ts}'],
   } as Partial<TypeOrmModuleOptions>;
 });
