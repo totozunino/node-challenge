@@ -1,11 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { StockHistory } from './stock-history.entity';
-
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-}
+import { UserRole } from '@node-challenge/dtos';
 
 @Entity()
 export class User extends BaseEntity {

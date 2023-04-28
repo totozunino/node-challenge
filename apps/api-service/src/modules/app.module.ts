@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigType } from '@nestjs/config';
-import { ConfigurationModule } from './config/configuration.module';
-import dbConfig from './config/db.config';
+import { ConfigurationModule } from '../config/configuration.module';
+import dbConfig from '../config/db.config';
+import { UserModule } from '../modules/user/user.module';
 
 @Module({
   imports: [
@@ -13,8 +12,9 @@ import dbConfig from './config/db.config';
       useFactory: (config: ConfigType<typeof dbConfig>) => config,
       inject: [dbConfig.KEY],
     }),
+    UserModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
