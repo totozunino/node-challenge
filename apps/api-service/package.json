@@ -18,10 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "ts-node -r tsconfig-paths/register --project ./tsconfig.json -r dotenv/config ../../node_modules/typeorm/cli.js",
-    "db:migrate": "npm run typeorm -- migration:run -d db/data-source.ts",
-    "db:migrate:generate": "npm run typeorm -- migration:generate -d db/data-source.ts",
-    "db:migrate:rollback": "npm run typeorm -- migration:revert -d db/data-source.ts"
+    "typeorm": "typeorm-ts-node-commonjs -d ./db/data-source.ts",
+    "db:migrate": "npm run typeorm migration:run",
+    "db:migrate:generate": "npm run typeorm migration:generate ./db/migrations/$npm_config_name",
+    "db:migrate:rollback": "npm run typeorm migration:revert"
   },
   "dependencies": {
     "@hapi/joi": "17.1.1",

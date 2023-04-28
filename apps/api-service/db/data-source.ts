@@ -1,4 +1,7 @@
 import { DataSource, DataSourceOptions, DatabaseType } from 'typeorm';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export const dataSourceOptions = {
   type: process.env.DB_TYPE as DatabaseType,
