@@ -9,13 +9,13 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 @Controller('users')
 @ApiTags('users')
 export class UserController {
-  constructor(private readonly usersService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   @ApiResponse({ type: CreateUserResponseDto })
   public async register(
     @Body() body: CreateUserInputDto,
   ): Promise<CreateUserResponseDto> {
-    return await this.usersService.register(body);
+    return await this.userService.register(body);
   }
 }
