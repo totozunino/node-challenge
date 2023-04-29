@@ -8,7 +8,7 @@ import {
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { StockService } from './stock.service';
 import { Response } from 'express';
-import { StockResponseDto } from '@node-challenge/dtos';
+import { StockDto } from '@node-challenge/dtos';
 
 @Controller('stocks')
 @ApiTags('stocks')
@@ -17,7 +17,7 @@ export class StockController {
 
   @Get()
   @ApiResponse({
-    type: StockResponseDto,
+    type: StockDto,
   })
   public async getStock(
     @Query('stockCode') stockCode: string,
