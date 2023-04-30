@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  api-service:
+    build:
+      dockerfile: ./apps/api-service/Dockerfile
+
+    ports:
+      - "3000:3000"
+    networks:
+      - mynetwork
+    environment:
+      DB_TYPE: "sqlite"
+      DB_NAME: "db.sqlite"
+      PASSPORT_SECRET: "secret"
+      STOCK_SERVICE_URL: "http://stock-service:3001/stocks"
+
+  stock-service:
+    build:
+      dockerfile: ./apps/stock-service/Dockerfile
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
