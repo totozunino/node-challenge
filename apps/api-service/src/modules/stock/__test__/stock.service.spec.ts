@@ -11,6 +11,7 @@ import { StockService } from '../stock.service';
 import stockServiceConfig from '../../../config/stock-service.config';
 import { UserService } from '../../user/user.service';
 import axios from 'axios';
+import { UnauthorizedException } from '@nestjs/common';
 
 const chance = new Chance();
 
@@ -58,7 +59,7 @@ describe('Stock Service', () => {
         data: mockedStock,
       });
 
-      userService.getUserOrThrow.mockResolvedValue(mockedUser);
+      userService.getUser.mockResolvedValue(mockedUser);
       mockRepository.create.mockReturnValue(mockedStock);
       mockRepository.save.mockReturnValue(Promise.resolve(mockedStock));
 
@@ -83,10 +84,10 @@ describe('Stock Service', () => {
       const userId = chance.guid();
       const stockCode = chance.string();
 
-      userService.getUserOrThrow.mockRejectedValue(new Error('User not found'));
+      userService.getUser.mockRejectedValue(new UnauthorizedException());
 
       await expect(stockService.getStock(stockCode, userId)).rejects.toThrow(
-        'User not found',
+        'Unauthorized',
       );
     });
   });

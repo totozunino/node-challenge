@@ -13,7 +13,7 @@ type JwtPayload = {
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @Inject(authConfig.KEY)
-    private readonly authConfiguration: ConfigType<typeof authConfig>,
+    readonly authConfiguration: ConfigType<typeof authConfig>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

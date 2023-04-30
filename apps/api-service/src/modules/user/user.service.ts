@@ -42,6 +42,10 @@ export class UserService {
     return this.userRepository.findOneOrFail(options);
   }
 
+  public async getUser(options: FindOneOptions<User>): Promise<User> {
+    return await this.userRepository.findOne(options);
+  }
+
   public async updateRefreshToken(
     userId: string,
     refreshToken: string,

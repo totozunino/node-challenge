@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StockHistory } from '../../entities';
 import { Repository } from 'typeorm';
@@ -33,11 +33,15 @@ export class StockService {
       { params: { stockCode } },
     );
 
-    const user = await this.userService.getUserOrThrow({
+    const user = await this.userService.getUser({
       where: {
         id: userId,
       },
     });
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
 
     const stock = this.stockHistoryRepository.create({
       close: data.close,
