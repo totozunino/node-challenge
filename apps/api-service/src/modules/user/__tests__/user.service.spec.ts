@@ -34,11 +34,11 @@ describe('User Service', () => {
         role: chance.pickone(Object.values(UserRole)),
       };
 
-      const mockedMember = buildMockedUser(body);
+      const mockedUser = buildMockedUser(body);
 
       mockRepository.findOne.mockReturnValue(null);
-      mockRepository.create.mockReturnValue(mockedMember);
-      mockRepository.save.mockReturnValue(Promise.resolve(mockedMember));
+      mockRepository.create.mockReturnValue(mockedUser);
+      mockRepository.save.mockReturnValue(Promise.resolve(mockedUser));
 
       await userService.register(body);
 
@@ -49,7 +49,7 @@ describe('User Service', () => {
         password: expect.any(String),
       });
       expect(mockRepository.save).toHaveBeenCalledTimes(1);
-      expect(mockRepository.save).toHaveBeenCalledWith(mockedMember);
+      expect(mockRepository.save).toHaveBeenCalledWith(mockedUser);
     });
 
     it('should throw an error if the user already exists', async () => {
@@ -58,9 +58,9 @@ describe('User Service', () => {
         role: chance.pickone(Object.values(UserRole)),
       };
 
-      const mockedMember = buildMockedUser(body);
+      const mockedUser = buildMockedUser(body);
 
-      mockRepository.findOne.mockReturnValue(mockedMember);
+      mockRepository.findOne.mockReturnValue(mockedUser);
 
       await expect(userService.register(body)).rejects.toThrow(
         'User already exists',

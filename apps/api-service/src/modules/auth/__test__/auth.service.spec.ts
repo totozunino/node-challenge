@@ -47,15 +47,13 @@ describe('Auth Service', () => {
         password: chance.string(),
       };
 
-      const mockedMember = buildMockedUser({
+      const mockedUser = buildMockedUser({
         email: input.email,
       });
 
       const token = chance.string();
 
-      mockRepository.findOneOrFail.mockReturnValue(
-        Promise.resolve(mockedMember),
-      );
+      mockRepository.findOneOrFail.mockReturnValue(Promise.resolve(mockedUser));
 
       (compare as jest.Mock) = jest.fn().mockReturnValue(true);
 
@@ -69,7 +67,7 @@ describe('Auth Service', () => {
       });
       expect(mockRepository.update).toHaveBeenCalledTimes(1);
       expect(mockRepository.update).toHaveBeenCalledWith(
-        { id: mockedMember.id },
+        { id: mockedUser.id },
         { refreshToken: expect.any(String) },
       );
       expect(result).toMatchObject({
@@ -99,13 +97,11 @@ describe('Auth Service', () => {
         password: chance.string(),
       };
 
-      const mockedMember = buildMockedUser({
+      const mockedUser = buildMockedUser({
         email: input.email,
       });
 
-      mockRepository.findOneOrFail.mockReturnValue(
-        Promise.resolve(mockedMember),
-      );
+      mockRepository.findOneOrFail.mockReturnValue(Promise.resolve(mockedUser));
 
       (compare as jest.Mock) = jest.fn().mockReturnValue(false);
 
@@ -122,14 +118,12 @@ describe('Auth Service', () => {
       };
       const userId = chance.guid();
 
-      const mockedMember = buildMockedUser({
+      const mockedUser = buildMockedUser({
         id: userId,
       });
       const token = chance.string();
 
-      mockRepository.findOneOrFail.mockReturnValue(
-        Promise.resolve(mockedMember),
-      );
+      mockRepository.findOneOrFail.mockReturnValue(Promise.resolve(mockedUser));
 
       jwtService.sign.mockReturnValue(token);
 
@@ -143,7 +137,7 @@ describe('Auth Service', () => {
       });
       expect(mockRepository.update).toHaveBeenCalledTimes(1);
       expect(mockRepository.update).toHaveBeenCalledWith(
-        { id: mockedMember.id },
+        { id: mockedUser.id },
         { refreshToken: expect.any(String) },
       );
       expect(result).toMatchObject({
@@ -173,13 +167,11 @@ describe('Auth Service', () => {
       };
       const userId = chance.guid();
 
-      const mockedMember = buildMockedUser({
+      const mockedUser = buildMockedUser({
         id: userId,
       });
 
-      mockRepository.findOneOrFail.mockReturnValue(
-        Promise.resolve(mockedMember),
-      );
+      mockRepository.findOneOrFail.mockReturnValue(Promise.resolve(mockedUser));
 
       (compare as jest.Mock) = jest.fn().mockReturnValue(false);
 
@@ -193,11 +185,11 @@ describe('Auth Service', () => {
     it('should logout the user successfully', async () => {
       const userId = chance.guid();
 
-      const mockedMember = buildMockedUser({
+      const mockedUser = buildMockedUser({
         id: userId,
       });
 
-      mockRepository.update.mockReturnValue(Promise.resolve(mockedMember));
+      mockRepository.update.mockReturnValue(Promise.resolve(mockedUser));
 
       await authService.logout(userId);
 

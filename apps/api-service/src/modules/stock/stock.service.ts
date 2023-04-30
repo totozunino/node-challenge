@@ -8,7 +8,7 @@ import {
   StockResponseDto,
   StockStatsResponseDto,
 } from '@node-challenge/dtos';
-import stockServiceConfig from 'src/config/stock-service.config';
+import stockServiceConfig from '../../config/stock-service.config';
 import { ConfigType } from '@nestjs/config';
 import { UserService } from '../user/user.service';
 
