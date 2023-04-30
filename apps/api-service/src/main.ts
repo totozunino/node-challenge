@@ -13,6 +13,7 @@ async function bootstrap(): Promise<void> {
   );
 
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('API Service')
     .setVersion('1.0')
     .build();

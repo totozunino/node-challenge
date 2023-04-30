@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../entities';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import {
   CreateUserInputDto,
   CreateUserResponseDto,
@@ -38,8 +38,22 @@ export class UserService {
     };
   }
 
+  public async getUserOrThrow(options: FindOneOptions<User>): Promise<User> {
+    return this.userRepository.findOneOrFail(options);
+  }
+
+  public async updateRefreshToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<void> {
+    await this.userRepository.update(
+      { id: userId },
+      { refreshToken: refreshToken },
+    );
+  }
+
   private async getUserByEmail(email: string): Promise<User> {
-    return await this.userRepository.findOne({
+    return this.userRepository.findOne({
       where: {
         email,
       },

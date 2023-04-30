@@ -1,10 +1,11 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { StockService } from './stock.service';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { StockResponseDto } from '@node-challenge/dtos';
 
 @Controller('stocks')
 @ApiTags('stocks')
+@ApiBearerAuth()
 export class StockController {
   constructor(private readonly stockService: StockService) {}
 

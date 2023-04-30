@@ -5,12 +5,14 @@ import {
   CreateUserResponseDto,
 } from '@node-challenge/dtos';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '../auth/decorators';
 
 @Controller('users')
 @ApiTags('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Public()
   @Post()
   @ApiResponse({ type: CreateUserResponseDto })
   public async register(

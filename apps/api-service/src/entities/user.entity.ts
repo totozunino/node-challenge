@@ -17,6 +17,9 @@ export class User extends BaseEntity {
   })
   public role: UserRole;
 
+  @Column({ nullable: true })
+  public refreshToken: string;
+
   @OneToMany(() => StockHistory, (stockHistory) => stockHistory.user, {
     eager: false,
   })
