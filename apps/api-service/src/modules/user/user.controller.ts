@@ -4,7 +4,7 @@ import {
   CreateUserInputDto,
   CreateUserResponseDto,
 } from '@node-challenge/dtos';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from '../auth/decorators';
 
 @Controller('users')
@@ -14,6 +14,10 @@ export class UserController {
 
   @Public()
   @Post()
+  @ApiOperation({
+    summary: 'Register user',
+    description: `It creates a new user and returns the user's data`,
+  })
   @ApiResponse({ type: CreateUserResponseDto })
   public async register(
     @Body() body: CreateUserInputDto,

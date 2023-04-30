@@ -5,7 +5,7 @@ import {
   Query,
   Res,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { StockService } from './stock.service';
 import { Response } from 'express';
 import { StockDto } from '@node-challenge/dtos';
@@ -18,6 +18,10 @@ export class StockController {
   @Get()
   @ApiResponse({
     type: StockDto,
+  })
+  @ApiOperation({
+    summary: 'Get stock',
+    description: `It get the stock's data from the external API`,
   })
   public async getStock(
     @Query('stockCode') stockCode: string,

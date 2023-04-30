@@ -1,6 +1,11 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { StockService } from './stock.service';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   StockResponseDto,
   StockStatsResponseDto,
@@ -18,6 +23,10 @@ export class StockController {
 
   @Get()
   @ApiResponse({ type: StockResponseDto })
+  @ApiOperation({
+    summary: 'Get stock',
+    description: `It returns the stock's data and saves the stock in the user's history`,
+  })
   public async getStock(
     @User('sub') userId: string,
     @Query('stockCode') stockCode: string,
@@ -27,6 +36,10 @@ export class StockController {
 
   @Get('/history')
   @ApiResponse({ type: StockResponseDto, isArray: true })
+  @ApiOperation({
+    summary: 'Get stock history',
+    description: `It returns the user's stock history`,
+  })
   public async getStockHistory(
     @User('sub') userId: string,
   ): Promise<StockResponseDto[]> {
@@ -37,6 +50,10 @@ export class StockController {
   @Roles(UserRole.ADMIN)
   @UseGuards(RolesGuard)
   @ApiResponse({ type: StockStatsResponseDto, isArray: true })
+  @ApiOperation({
+    summary: 'Get stock stats',
+    description: `It returns the stock's stats. Only for admin users`,
+  })
   public async getStats(): Promise<StockStatsResponseDto[]> {
     return await this.stockService.getStockStats();
   }

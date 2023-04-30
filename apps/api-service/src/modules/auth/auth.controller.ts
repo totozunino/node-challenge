@@ -1,5 +1,10 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   LoginInputDto,
   LoginResponseDto,
@@ -16,6 +21,10 @@ export class AuthController {
   @Public()
   @Post('/login')
   @ApiResponse({ type: LoginResponseDto })
+  @ApiOperation({
+    summary: 'Login',
+    description: `Login in user and return tokens`,
+  })
   @HttpCode(HttpStatus.OK)
   public async login(@Body() body: LoginInputDto): Promise<LoginResponseDto> {
     return await this.authService.login(body);
@@ -23,6 +32,11 @@ export class AuthController {
 
   @ApiBearerAuth()
   @Post('/refresh-token')
+  @ApiResponse({ type: LoginResponseDto })
+  @ApiOperation({
+    summary: 'Refresh Token',
+    description: `If access token is expired, use refresh token to get new access token`,
+  })
   @HttpCode(HttpStatus.OK)
   public async refreshToken(
     @User('sub') userId: string,
@@ -33,6 +47,10 @@ export class AuthController {
 
   @ApiBearerAuth()
   @Post('/logout')
+  @ApiOperation({
+    summary: 'Logout',
+    description: `Logout user and invalidate refresh token`,
+  })
   @HttpCode(HttpStatus.OK)
   public async logout(@User('sub') userId: string): Promise<void> {
     await this.authService.logout(userId);
