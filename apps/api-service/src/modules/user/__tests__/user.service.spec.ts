@@ -1,34 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from './user.service';
+import { UserService } from '../user.service';
 import { CreateUserInputDto, UserRole } from '@node-challenge/dtos';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../../entities';
+import { User } from '../../../entities';
+import { buildMockedUser, mockRepository } from '../../../../test/utils';
 import Chance from 'chance';
 
 const chance = new Chance();
 
-const buildMockedMember = (attrs: Partial<User>): User => {
-  return {
-    createdAt: new Date(),
-    email: chance.email(),
-    id: chance.guid(),
-    password: chance.hash(),
-    role: chance.pickone(Object.values(UserRole)),
-    updatedAt: new Date(),
-    stockHistory: null,
-    refreshToken: null,
-    ...attrs,
-  };
-};
-
 describe('User Service', () => {
   let userService: UserService;
-
-  const usersRepository = {
-    create: jest.fn(),
-    save: jest.fn(),
-    findOne: jest.fn(),
-  };
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
@@ -38,7 +19,7 @@ describe('User Service', () => {
         UserService,
         {
           provide: getRepositoryToken(User),
-          useValue: usersRepository,
+          useValue: mockRepository,
         },
       ],
     }).compile();
@@ -53,22 +34,22 @@ describe('User Service', () => {
         role: chance.pickone(Object.values(UserRole)),
       };
 
-      const mockedMember = buildMockedMember(body);
+      const mockedMember = buildMockedUser(body);
 
-      usersRepository.findOne.mockReturnValue(null);
-      usersRepository.create.mockReturnValue(mockedMember);
-      usersRepository.save.mockReturnValue(Promise.resolve(mockedMember));
+      mockRepository.findOne.mockReturnValue(null);
+      mockRepository.create.mockReturnValue(mockedMember);
+      mockRepository.save.mockReturnValue(Promise.resolve(mockedMember));
 
       await userService.register(body);
 
-      expect(usersRepository.create).toHaveBeenCalledTimes(1);
-      expect(usersRepository.create).toHaveBeenCalledWith({
+      expect(mockRepository.create).toHaveBeenCalledTimes(1);
+      expect(mockRepository.create).toHaveBeenCalledWith({
         email: body.email,
         role: body.role,
         password: expect.any(String),
       });
-      expect(usersRepository.save).toHaveBeenCalledTimes(1);
-      expect(usersRepository.save).toHaveBeenCalledWith(mockedMember);
+      expect(mockRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockRepository.save).toHaveBeenCalledWith(mockedMember);
     });
 
     it('should throw an error if the user already exists', async () => {
@@ -77,9 +58,9 @@ describe('User Service', () => {
         role: chance.pickone(Object.values(UserRole)),
       };
 
-      const mockedMember = buildMockedMember(body);
+      const mockedMember = buildMockedUser(body);
 
-      usersRepository.findOne.mockReturnValue(mockedMember);
+      mockRepository.findOne.mockReturnValue(mockedMember);
 
       await expect(userService.register(body)).rejects.toThrow(
         'User already exists',
