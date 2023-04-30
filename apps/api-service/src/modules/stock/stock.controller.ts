@@ -15,7 +15,15 @@ export class StockController {
   public async getStock(
     @User('sub') userId: string,
     @Query('stockCode') stockCode: string,
-  ): Promise<Partial<StockResponseDto>> {
+  ): Promise<StockResponseDto> {
     return await this.stockService.getStock(stockCode, userId);
+  }
+
+  @Get('/history')
+  @ApiResponse({ type: StockResponseDto })
+  public async getStockHistory(
+    @User('sub') userId: string,
+  ): Promise<StockResponseDto[]> {
+    return await this.stockService.getStockHistory(userId);
   }
 }

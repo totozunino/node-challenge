@@ -16,6 +16,7 @@ const buildMockedMember = (attrs: Partial<User>): User => {
     role: chance.pickone(Object.values(UserRole)),
     updatedAt: new Date(),
     stockHistory: null,
+    refreshToken: null,
     ...attrs,
   };
 };

@@ -58,4 +58,27 @@ export class StockService {
       close,
     };
   }
+
+  public async getStockHistory(userId: string): Promise<StockResponseDto[]> {
+    const stockHistory = await this.stockHistoryRepository.find({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return stockHistory.map((stock) => ({
+      createdAt: stock.createdAt,
+      name: stock.name,
+      symbol: stock.symbol,
+      open: stock.open,
+      high: stock.high,
+      low: stock.low,
+      close: stock.close,
+    }));
+  }
 }
