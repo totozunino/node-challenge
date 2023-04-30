@@ -3,7 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { StockHistory } from '../../entities';
 import { Repository } from 'typeorm';
 import axios from 'axios';
-import { StockDto, StockResponseDto } from '@node-challenge/dtos';
+import {
+  StockDto,
+  StockResponseDto,
+  StockStatsResponseDto,
+} from '@node-challenge/dtos';
 import stockServiceConfig from 'src/config/stock-service.config';
 import { ConfigType } from '@nestjs/config';
 import { UserService } from '../user/user.service';
@@ -80,5 +84,22 @@ export class StockService {
       low: stock.low,
       close: stock.close,
     }));
+  }
+
+  public async getStockStats(): Promise<StockStatsResponseDto[]> {
+    const stockStats = await this.stockHistoryRepository
+      .createQueryBuilder('sh')
+      .select('sh.symbol')
+      .addSelect('count(sh.symbol) as count')
+      .groupBy('sh.symbol')
+      .limit(5)
+      .getRawMany();
+
+    return stockStats.map((stock) => {
+      return {
+        stock: stock.sh_symbol,
+        timesRequested: stock.count,
+      };
+    });
   }
 }

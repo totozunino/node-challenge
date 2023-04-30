@@ -7,13 +7,16 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ConfigType } from '@nestjs/config';
+import authConfig from 'src/config/auth.config';
 
 @Module({
   imports: [
     UserModule,
     PassportModule,
-    JwtModule.register({
-      secret: 'secret',
+    JwtModule.registerAsync({
+      useFactory: (config: ConfigType<typeof authConfig>) => config,
+      inject: [authConfig.KEY],
     }),
   ],
   controllers: [AuthController],
