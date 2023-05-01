@@ -46,4 +46,16 @@ export class StockDto {
   @IsNumber()
   @IsNotEmpty()
   public volume: number;
+
+  constructor(attrs: StockDto) {
+    this.close = attrs.close;
+    this.date = attrs.date;
+    this.high = attrs.high;
+    this.low = attrs.low;
+    this.name = attrs.name;
+    this.open = attrs.open;
+    this.symbol = attrs.symbol;
+    this.time = attrs.time;
+    this.volume = attrs.volume;
+  }
 }

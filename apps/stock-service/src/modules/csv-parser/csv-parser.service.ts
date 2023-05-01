@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { Readable, pipeline } from 'stream';
+import { Readable } from 'stream';
 import { parse } from 'csv-parse';
 import { StockTransformer } from './stock-transformer';
 import { STOCK_API_URL } from './constants';
@@ -33,15 +33,8 @@ export class CSVParserService {
     const parser = parse({ delimiter: ',', to: 1, columns: true });
     const stockTransformer = new StockTransformer();
 
-    return pipeline(
-      await this.getStockStream(stockCode),
-      parser,
-      stockTransformer,
-      (err) => {
-        if (err) {
-          throw err;
-        }
-      },
-    );
+    return (await this.getStockStream(stockCode))
+      .pipe(parser)
+      .pipe(stockTransformer);
   }
 }

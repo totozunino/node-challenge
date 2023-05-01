@@ -84,6 +84,15 @@ The services APIs were documented using Swagger to see the documentation go to `
 - [Api Service Swagger](http://localhost:3000/api)
 - [Stock Service Swagger](http://localhost:3001/api)
 
+### Tests
+
+To run all test specs
+
+```sh
+npm run test
+
+```
+
 ### Author
 
 Mathias Zunino \

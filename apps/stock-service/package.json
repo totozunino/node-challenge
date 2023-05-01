@@ -26,6 +26,7 @@
     "@nestjs/swagger": "6.3.0",
     "@node-challenge/dtos": "*",
     "axios": "1.4.0",
+    "class-validator": "0.14.0",
     "csv-parse": "5.3.8",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"

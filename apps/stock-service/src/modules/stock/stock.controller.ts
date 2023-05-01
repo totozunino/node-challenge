@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  HttpException,
   InternalServerErrorException,
   NotFoundException,
   Query,
@@ -30,18 +31,22 @@ export class StockController {
   ): Promise<void> {
     res.setHeader('Content-Type', 'application/json');
 
-    const data = await this.stockService.getStock(stockCode);
+    try {
+      const data = await this.stockService.getStock(stockCode);
 
-    data.on('error', () => {
-      res.status(500).send(new InternalServerErrorException().getResponse());
-    });
-
-    data.on('data', (data) => {
-      if (data.includes('N/D')) {
-        res.status(404).send(new NotFoundException().getResponse());
-      } else {
-        res.send(data);
+      for await (const chunk of data) {
+        if (chunk.includes('N/D')) {
+          res.status(404).send(new NotFoundException().getResponse());
+        } else {
+          res.send(chunk);
+        }
       }
-    });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        res.status(error.getStatus()).send(error.getResponse());
+      } else {
+        res.status(500).send(new InternalServerErrorException().getResponse());
+      }
+    }
   }
 }
