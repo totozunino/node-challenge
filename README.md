@@ -27,22 +27,21 @@ This monorepo includes the following packages/apps:
 
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
-
 ### Installation
 
 _Below is an example of how you can run the project._
 
-1. You can get it up and running by using docker compose.
+### Docker way
 
-   ```sh
-   $ docker-compose up
-   ```
+You can get it up and running by using docker compose.
 
-   This will run the `api-service` and `stock-service` with the corresponding setup like running migrations and set env variables
+```sh
+$ docker-compose up
+```
 
-2. You can also can do this without docker, it will take more steps but its ok
+This will run the `api-service` and `stock-service` with the corresponding setup like running migrations and set env variables
+
+### You can also can do this without docker, it will take more steps but its ok
 
 - Install NPM packages
 
