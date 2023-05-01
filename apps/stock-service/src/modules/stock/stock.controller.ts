@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Controller,
   Get,
   InternalServerErrorException,
@@ -11,7 +10,6 @@ import { ApiResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { StockService } from './stock.service';
 import { Response } from 'express';
 import { StockDto } from '@node-challenge/dtos';
-import { pipeline } from 'stream';
 
 @Controller('stocks')
 @ApiTags('stocks')
