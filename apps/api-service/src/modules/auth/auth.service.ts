@@ -16,7 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { User } from '../../entities';
 import { MailService } from '../mail/mail.service';
-import mailConfig from 'src/config/mail.config';
+import mailConfig from '../../config/mail.config';
 import { ConfigType } from '@nestjs/config';
 
 @Injectable()

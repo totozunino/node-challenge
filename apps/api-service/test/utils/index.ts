@@ -1,5 +1,5 @@
 import { StockDto, UserRole } from '@node-challenge/dtos';
-import { User } from '../../src/entities';
+import { Stock, StockHistory, User } from '../../src/entities';
 import Chance from 'chance';
 
 const chance = new Chance();
@@ -14,11 +14,43 @@ export const buildMockedUser = (attrs?: Partial<User>): User => {
     updatedAt: new Date(),
     stockHistory: null,
     refreshToken: null,
+    resetPasswordExpires: null,
+    resetPasswordToken: null,
     ...attrs,
   };
 };
 
-export const buildMockedStock = (attrs?: Partial<StockDto>): StockDto => {
+export const buildMockedStock = (attrs?: Partial<Stock>): Stock => {
+  return {
+    createdAt: new Date(),
+    id: chance.guid(),
+    name: chance.string(),
+    symbol: chance.string(),
+    stockHistory: null,
+    updatedAt: new Date(),
+    ...attrs,
+  };
+};
+
+export const buildMockedStockHistory = (
+  attrs?: Partial<StockHistory>,
+): StockHistory => {
+  return {
+    createdAt: new Date(),
+    id: chance.guid(),
+    updatedAt: new Date(),
+    close: chance.floating(),
+    date: new Date(),
+    high: chance.floating(),
+    low: chance.floating(),
+    open: chance.floating(),
+    stock: null,
+    user: null,
+    ...attrs,
+  };
+};
+
+export const buildMockedStockDto = (attrs?: Partial<StockDto>): StockDto => {
   return {
     close: chance.floating(),
     date: '2021-10-10',
@@ -33,7 +65,8 @@ export const buildMockedStock = (attrs?: Partial<StockDto>): StockDto => {
   };
 };
 
-export const mockRepository = {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const mockRepository = () => ({
   create: jest.fn(),
   save: jest.fn(),
   findOne: jest.fn(),
@@ -41,4 +74,4 @@ export const mockRepository = {
   update: jest.fn(),
   find: jest.fn(),
   createQueryBuilder: jest.fn(),
-};
+});

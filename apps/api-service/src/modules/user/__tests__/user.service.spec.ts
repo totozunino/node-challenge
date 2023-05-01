@@ -10,6 +10,7 @@ const chance = new Chance();
 
 describe('User Service', () => {
   let userService: UserService;
+  const mockedUserRepository = mockRepository();
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
@@ -19,7 +20,7 @@ describe('User Service', () => {
         UserService,
         {
           provide: getRepositoryToken(User),
-          useValue: mockRepository,
+          useValue: mockedUserRepository,
         },
       ],
     }).compile();
@@ -36,20 +37,20 @@ describe('User Service', () => {
 
       const mockedUser = buildMockedUser(body);
 
-      mockRepository.findOne.mockReturnValue(null);
-      mockRepository.create.mockReturnValue(mockedUser);
-      mockRepository.save.mockReturnValue(Promise.resolve(mockedUser));
+      mockedUserRepository.findOne.mockReturnValue(null);
+      mockedUserRepository.create.mockReturnValue(mockedUser);
+      mockedUserRepository.save.mockReturnValue(Promise.resolve(mockedUser));
 
       await userService.register(body);
 
-      expect(mockRepository.create).toHaveBeenCalledTimes(1);
-      expect(mockRepository.create).toHaveBeenCalledWith({
+      expect(mockedUserRepository.create).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.create).toHaveBeenCalledWith({
         email: body.email,
         role: body.role,
         password: expect.any(String),
       });
-      expect(mockRepository.save).toHaveBeenCalledTimes(1);
-      expect(mockRepository.save).toHaveBeenCalledWith(mockedUser);
+      expect(mockedUserRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.save).toHaveBeenCalledWith(mockedUser);
     });
 
     it('should throw an error if the user already exists', async () => {
@@ -60,7 +61,7 @@ describe('User Service', () => {
 
       const mockedUser = buildMockedUser(body);
 
-      mockRepository.findOne.mockReturnValue(mockedUser);
+      mockedUserRepository.findOne.mockReturnValue(mockedUser);
 
       await expect(userService.register(body)).rejects.toThrow(
         'User already exists',

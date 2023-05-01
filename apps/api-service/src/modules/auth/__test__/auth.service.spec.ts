@@ -5,17 +5,26 @@ import { AuthService } from '../auth.service';
 import { UserService } from '../../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../../entities';
-import { LoginInputDto, RefreshTokenInputDto } from '@node-challenge/dtos';
+import {
+  LoginInputDto,
+  RefreshTokenInputDto,
+  ResetPasswordInputDto,
+} from '@node-challenge/dtos';
 import { compare } from 'bcrypt';
 import { buildMockedUser, mockRepository } from '../../../../test/utils';
+import { MailService } from '../../../modules/mail/mail.service';
+import mailConfig from '../../../config/mail.config';
 
 const chance = new Chance();
 
 jest.mock('@nestjs/jwt');
+jest.mock('../../../modules/mail/mail.service');
 
 describe('Auth Service', () => {
   let authService: AuthService;
   let jwtService: jest.Mocked<JwtService>;
+  let mailService: jest.Mocked<MailService>;
+  const mockedUserRepository = mockRepository();
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
@@ -25,15 +34,23 @@ describe('Auth Service', () => {
         AuthService,
         UserService,
         JwtService,
+        MailService,
         {
           provide: getRepositoryToken(User),
-          useValue: mockRepository,
+          useValue: mockedUserRepository,
+        },
+        {
+          provide: mailConfig.KEY,
+          useValue: {
+            resetLinkUrl: chance.url(),
+          },
         },
       ],
     }).compile();
 
     authService = app.get<AuthService>(AuthService);
     jwtService = app.get(JwtService);
+    mailService = app.get(MailService);
   });
 
   afterEach(() => {
@@ -53,7 +70,9 @@ describe('Auth Service', () => {
 
       const token = chance.string();
 
-      mockRepository.findOneOrFail.mockReturnValue(Promise.resolve(mockedUser));
+      mockedUserRepository.findOneOrFail.mockReturnValue(
+        Promise.resolve(mockedUser),
+      );
 
       (compare as jest.Mock) = jest.fn().mockReturnValue(true);
 
@@ -61,12 +80,12 @@ describe('Auth Service', () => {
 
       const result = await authService.login(input);
 
-      expect(mockRepository.findOneOrFail).toHaveBeenCalledTimes(1);
-      expect(mockRepository.findOneOrFail).toHaveBeenCalledWith({
+      expect(mockedUserRepository.findOneOrFail).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.findOneOrFail).toHaveBeenCalledWith({
         where: { email: input.email },
       });
-      expect(mockRepository.update).toHaveBeenCalledTimes(1);
-      expect(mockRepository.update).toHaveBeenCalledWith(
+      expect(mockedUserRepository.update).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.update).toHaveBeenCalledWith(
         { id: mockedUser.id },
         { refreshToken: expect.any(String) },
       );
@@ -82,7 +101,7 @@ describe('Auth Service', () => {
         password: chance.string(),
       };
 
-      mockRepository.findOneOrFail.mockRejectedValue(
+      mockedUserRepository.findOneOrFail.mockRejectedValue(
         new Error('User not found'),
       );
 
@@ -101,7 +120,9 @@ describe('Auth Service', () => {
         email: input.email,
       });
 
-      mockRepository.findOneOrFail.mockReturnValue(Promise.resolve(mockedUser));
+      mockedUserRepository.findOneOrFail.mockReturnValue(
+        Promise.resolve(mockedUser),
+      );
 
       (compare as jest.Mock) = jest.fn().mockReturnValue(false);
 
@@ -123,7 +144,9 @@ describe('Auth Service', () => {
       });
       const token = chance.string();
 
-      mockRepository.findOneOrFail.mockReturnValue(Promise.resolve(mockedUser));
+      mockedUserRepository.findOneOrFail.mockReturnValue(
+        Promise.resolve(mockedUser),
+      );
 
       jwtService.sign.mockReturnValue(token);
 
@@ -131,12 +154,12 @@ describe('Auth Service', () => {
 
       const result = await authService.refreshToken(userId, input);
 
-      expect(mockRepository.findOneOrFail).toHaveBeenCalledTimes(1);
-      expect(mockRepository.findOneOrFail).toHaveBeenCalledWith({
+      expect(mockedUserRepository.findOneOrFail).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.findOneOrFail).toHaveBeenCalledWith({
         where: { id: userId },
       });
-      expect(mockRepository.update).toHaveBeenCalledTimes(1);
-      expect(mockRepository.update).toHaveBeenCalledWith(
+      expect(mockedUserRepository.update).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.update).toHaveBeenCalledWith(
         { id: mockedUser.id },
         { refreshToken: expect.any(String) },
       );
@@ -152,7 +175,7 @@ describe('Auth Service', () => {
       };
       const userId = chance.guid();
 
-      mockRepository.findOneOrFail.mockRejectedValue(
+      mockedUserRepository.findOneOrFail.mockRejectedValue(
         new Error('User not found'),
       );
 
@@ -171,7 +194,9 @@ describe('Auth Service', () => {
         id: userId,
       });
 
-      mockRepository.findOneOrFail.mockReturnValue(Promise.resolve(mockedUser));
+      mockedUserRepository.findOneOrFail.mockReturnValue(
+        Promise.resolve(mockedUser),
+      );
 
       (compare as jest.Mock) = jest.fn().mockReturnValue(false);
 
@@ -189,15 +214,121 @@ describe('Auth Service', () => {
         id: userId,
       });
 
-      mockRepository.update.mockReturnValue(Promise.resolve(mockedUser));
+      mockedUserRepository.update.mockReturnValue(Promise.resolve(mockedUser));
 
       await authService.logout(userId);
 
-      expect(mockRepository.update).toHaveBeenCalledTimes(1);
-      expect(mockRepository.update).toHaveBeenCalledWith(
+      expect(mockedUserRepository.update).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.update).toHaveBeenCalledWith(
         { id: userId },
         { refreshToken: null },
       );
+    });
+  });
+
+  describe('sendPasswordRecoveryEmail', () => {
+    it('should send the password recovery email successfully', async () => {
+      const email = chance.email();
+
+      const mockedUser = buildMockedUser({
+        email,
+      });
+
+      mockedUserRepository.findOne.mockReturnValue(Promise.resolve(mockedUser));
+
+      mockedUserRepository.update.mockReturnValue(Promise.resolve(mockedUser));
+
+      await authService.sendPasswordRecoveryEmail(email);
+
+      expect(mockedUserRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.findOne).toHaveBeenCalledWith({
+        where: { email },
+      });
+      expect(mockedUserRepository.update).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.update).toHaveBeenCalledWith(
+        { id: mockedUser.id },
+        {
+          resetPasswordToken: expect.any(String),
+          resetPasswordExpires: expect.any(Date),
+        },
+      );
+
+      expect(mailService.sendMail).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an error if the user does not exist', async () => {
+      mockedUserRepository.findOne.mockReturnValue(Promise.resolve(null));
+
+      await expect(
+        authService.sendPasswordRecoveryEmail(chance.email()),
+      ).rejects.toThrowError('User not found');
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should reset the password successfully', async () => {
+      const input: ResetPasswordInputDto = {
+        password: chance.string(),
+        token: chance.string(),
+      };
+
+      const mockedUser = buildMockedUser({
+        resetPasswordToken: input.token,
+        resetPasswordExpires: new Date(),
+      });
+
+      mockedUserRepository.findOne.mockReturnValue(Promise.resolve(mockedUser));
+
+      mockedUserRepository.update.mockReturnValue(Promise.resolve(mockedUser));
+
+      await authService.resetPassword(input.token, input.password);
+
+      expect(mockedUserRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.findOne).toHaveBeenCalledWith({
+        where: { resetPasswordToken: input.token },
+      });
+      expect(mockedUserRepository.update).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.update).toHaveBeenCalledWith(
+        { id: mockedUser.id },
+        {
+          password: expect.any(String),
+          resetPasswordToken: null,
+          resetPasswordExpires: null,
+        },
+      );
+    });
+
+    it('should throw an error if the token is invalid', async () => {
+      const input: ResetPasswordInputDto = {
+        password: chance.string(),
+        token: chance.string(),
+      };
+
+      mockedUserRepository.findOne.mockReturnValue(Promise.resolve(null));
+
+      await expect(
+        authService.resetPassword(input.token, input.password),
+      ).rejects.toThrowError('Unauthorized');
+    });
+
+    it('should throw an error if the token is expired', async () => {
+      const input: ResetPasswordInputDto = {
+        password: chance.string(),
+        token: chance.string(),
+      };
+
+      const mockedUser = buildMockedUser({
+        resetPasswordToken: input.token,
+        resetPasswordExpires: new Date(
+          new Date().getTime() - 60 * 60 * 1000 * 2,
+        ),
+      });
+
+      mockedUserRepository.findOne.mockReturnValue(Promise.resolve(mockedUser));
+
+      await expect(
+        authService.resetPassword(input.token, input.password),
+      ).rejects.toThrowError('Unauthorized');
     });
   });
 });

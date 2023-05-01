@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Readable, pipeline } from 'stream';
 import { parse } from 'csv-parse';
 import { StockTransformer } from './stock-transformer';
+import { STOCK_API_URL } from './constants';
 
 /*
 
@@ -15,12 +16,15 @@ import { StockTransformer } from './stock-transformer';
 @Injectable()
 export class CSVParserService {
   private async getStockStream(stockCode: string): Promise<Readable> {
-    const { data } = await axios.get<Readable>(
-      `https://stooq.com/q/l/?s=${stockCode}&f=sd2t2ohlcvn&h&e=csv`,
-      {
-        responseType: 'stream',
+    const { data } = await axios.get<Readable>(STOCK_API_URL, {
+      responseType: 'stream',
+      params: {
+        s: stockCode,
+        f: 'sd2t2ohlcvn',
+        h: '',
+        e: 'csv',
       },
-    );
+    });
 
     return data;
   }
