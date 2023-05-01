@@ -6,6 +6,7 @@ import {
   buildMockedStockDto,
   buildMockedStockHistory,
   buildMockedUser,
+  mockEntityManager,
   mockRepository,
 } from '../../../../test/utils';
 import Chance from 'chance';
@@ -78,9 +79,7 @@ describe('Stock Service', () => {
       });
 
       userService.getUser.mockResolvedValue(mockedUser);
-      mockedStockRepository.findOne.mockReturnValue(
-        Promise.resolve(mockedStock),
-      );
+      mockEntityManager.findOne.mockReturnValue(Promise.resolve(mockedStock));
 
       mockedStockHistoryRepository.create.mockReturnValue(mockedStockHistory);
       mockedStockHistoryRepository.save.mockReturnValue(
@@ -89,8 +88,8 @@ describe('Stock Service', () => {
 
       await stockService.getStock(stockCode, userId);
 
-      expect(mockedStockRepository.findOne).toHaveBeenCalledTimes(1);
-      expect(mockedStockRepository.findOne).toHaveBeenCalledWith({
+      expect(mockEntityManager.findOne).toHaveBeenCalledTimes(1);
+      expect(mockEntityManager.findOne).toHaveBeenCalledWith(Stock, {
         where: {
           symbol: mockedStockDto.symbol,
         },
@@ -128,9 +127,9 @@ describe('Stock Service', () => {
       });
 
       userService.getUser.mockResolvedValue(mockedUser);
-      mockedStockRepository.findOne.mockReturnValue(null);
-      mockedStockRepository.create.mockReturnValue(mockedStock);
-      mockedStockRepository.save.mockReturnValue(Promise.resolve(mockedStock));
+      mockEntityManager.findOne.mockReturnValue(Promise.resolve(null));
+      mockEntityManager.create.mockReturnValue(mockedStock);
+      mockEntityManager.save.mockReturnValue(Promise.resolve(mockedStock));
 
       mockedStockHistoryRepository.create.mockReturnValue(mockedStockHistory);
       mockedStockHistoryRepository.save.mockReturnValue(
@@ -139,18 +138,19 @@ describe('Stock Service', () => {
 
       await stockService.getStock(stockCode, userId);
 
-      expect(mockedStockRepository.findOne).toHaveBeenCalledTimes(1);
-      expect(mockedStockRepository.findOne).toHaveBeenCalledWith({
+      expect(mockEntityManager.findOne).toHaveBeenCalledTimes(1);
+      expect(mockEntityManager.findOne).toHaveBeenCalledWith(Stock, {
         where: {
           symbol: mockedStockDto.symbol,
         },
       });
-      expect(mockedStockRepository.create).toHaveBeenCalledTimes(1);
-      expect(mockedStockRepository.create).toHaveBeenCalledWith({
+
+      expect(mockEntityManager.create).toHaveBeenCalledTimes(1);
+      expect(mockEntityManager.create).toHaveBeenCalledWith(Stock, {
         symbol: mockedStockDto.symbol,
         name: mockedStockDto.name,
       });
-      expect(mockedStockRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockEntityManager.save).toHaveBeenCalledTimes(1);
       expect(mockedStockHistoryRepository.create).toHaveBeenCalledTimes(1);
       expect(mockedStockHistoryRepository.create).toHaveBeenCalledWith({
         close: mockedStockDto.close,

@@ -65,6 +65,12 @@ export const buildMockedStockDto = (attrs?: Partial<StockDto>): StockDto => {
   };
 };
 
+export const mockEntityManager = {
+  create: jest.fn((_entityType, attributes) => attributes),
+  findOne: jest.fn((_entityType, attributes) => attributes),
+  save: jest.fn((entityOrEntities) => entityOrEntities),
+};
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const mockRepository = () => ({
   create: jest.fn(),
@@ -74,4 +80,7 @@ export const mockRepository = () => ({
   update: jest.fn(),
   find: jest.fn(),
   createQueryBuilder: jest.fn(),
+  manager: {
+    transaction: jest.fn(async (callback) => await callback(mockEntityManager)),
+  },
 });

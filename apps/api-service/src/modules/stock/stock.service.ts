@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
@@ -132,14 +133,27 @@ export class StockService {
     symbol: string,
     name: string,
   ): Promise<Stock> {
-    const stock = await this.stockRepository.findOne({ where: { symbol } });
+    return await this.stockRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        try {
+          const stock = await transactionalEntityManager.findOne(Stock, {
+            where: { symbol },
+          });
 
-    if (stock) {
-      return stock;
-    }
+          if (stock) {
+            return stock;
+          }
 
-    const newStock = this.stockRepository.create({ symbol, name });
+          const newStock = transactionalEntityManager.create(Stock, {
+            symbol,
+            name,
+          });
 
-    return await this.stockRepository.save(newStock);
+          return await transactionalEntityManager.save(Stock, newStock);
+        } catch (error) {
+          new BadRequestException('Error creating stock');
+        }
+      },
+    );
   }
 }
