@@ -1,81 +1,91 @@
-# Turborepo starter
+# Node Challenge
 
-This is an official starter Turborepo.
+Node.js code challenge to apply for jobsity
 
-## Using this example
+## Built with
 
-Run the following command:
+Here is a list of major frameworks/libraries used:
 
-```sh
-npx create-turbo@latest
-```
+- [Turborepo](https://turbo.build/repo/docs/).
+- [Nest.js](https://nestjs.com/)
+- [Typescript](https://www.typescriptlang.org/)
+- [Jest](https://jestjs.io/)
+- [TypeORM](https://typeorm.io/)
+- [Docker](https://www.docker.com/)
 
 ## What's inside?
 
-This Turborepo includes the following packages/apps:
+This monorepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `ui`: a stub React component library shared by both `web` and `docs` applications
-- `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
+- `api-service`: a [Nest.js](https://nestjs.com/) app
+- `stock-service`: a [Nest.js](https://nestjs.com/) app
+- `dtos`: a TypeScript package containing data transfer objects used by the `api-service` and `stock-service`
+- `eslint-config-custom`: `eslint` configurations
 - `tsconfig`: `tsconfig.json`s used throughout the monorepo
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Getting Started
 
-### Utilities
+This is an example of how you may give instructions on setting up your project locally.
+To get a local copy up and running follow these simple example steps.
 
-This Turborepo has some additional tools already setup for you:
+### Installation
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+_Below is an example of how you can run the project._
 
-### Build
+1. You can get it up and running by using docker compose.
 
-To build all apps and packages, run the following command:
+   ```sh
+   $ docker-compose up
+   ```
 
-```
-cd my-turborepo
-pnpm build
-```
+   This will run the `api-service` and `stock-service` with the corresponding setup like running migrations and set env variables
 
-### Develop
+2. You can also can do this without docker, it will take more steps but its ok
 
-To develop all apps and packages, run the following command:
+- Install NPM packages
 
-```
-cd my-turborepo
-pnpm dev
-```
+  ```sh
+  npm install
+  ```
 
-### Remote Caching
+- Create and `.env` file in `./apps/api-service` path(you can copy values from `.env.example`)
+  ```js
+  DB_TYPE = "sqlite";
+  DB_NAME = "database.sqlite";
+  STOCK_SERVICE_URL = "http://localhost:3001/stocks";
+  JWT_SECRET = "secret";
+  ```
+- Build all apps and packages
 
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+  ```sh
+  npm run build
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
+  # Build specific app example
+  npm run build -- --filter="api-service"
+  ```
 
-```
-cd my-turborepo
-npx turbo login
-```
+- Run migrations this will create the database and the schema
+  ```sh
+  cd apps/api-service # Move to api-service where the migrations are
+  npm run db:migrate
+  ```
+- Run all apps
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+  ```sh
+  npm run dev
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+  ```
 
-```
-npx turbo link
-```
+### Documentation
 
-## Useful Links
+The services APIs were documented using Swagger to see the documentation go to `SERVICE_URL/api` in your browser
 
-Learn more about the power of Turborepo:
+- [Api Service Swagger](http://localhost:3000/api)
+- [Stock Service Swagger](http://localhost:3001/api)
 
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+### Author
+
+Mathias Zunino \
+mathiaszunino@gmail.com
