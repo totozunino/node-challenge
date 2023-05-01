@@ -2,6 +2,15 @@
 
 Node.js code challenge to apply for jobsity
 
+**Bonuses**
+
+- Add unit tests for the services. ✅
+- Add contract/integration tests for the API service. ❌
+- Use JWT instead of basic authentication for endpoints. ✅
+- Use containers to orchestrate the services. ✅
+- Use OpenAPI/Swagger to document the API. ✅
+- Add endpoint to reset user password sending an email with the new password. ✅
+
 ## Built with
 
 Here is a list of major frameworks/libraries used:
