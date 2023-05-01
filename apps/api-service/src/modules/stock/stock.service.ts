@@ -1,8 +1,13 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Stock, StockHistory } from '../../entities';
 import { Repository } from 'typeorm';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import {
   StockDto,
   StockResponseDto,
@@ -30,10 +35,7 @@ export class StockService {
     stockCode: string,
     userId: string,
   ): Promise<StockResponseDto> {
-    const { data } = await axios.get<StockDto>(
-      this.stockServiceConfiguration.url,
-      { params: { stockCode } },
-    );
+    const data = await this.getStockFromStockService(stockCode);
 
     const user = await this.userService.getUser({
       where: {
@@ -69,6 +71,21 @@ export class StockService {
       low: stockHistory.low,
       close: stockHistory.close,
     };
+  }
+
+  private async getStockFromStockService(stockCode: string): Promise<StockDto> {
+    try {
+      const { data } = await axios.get<StockDto>(
+        this.stockServiceConfiguration.url,
+        { params: { stockCode } },
+      );
+
+      return data;
+    } catch (error) {
+      if ((error as AxiosError).response.status === 404) {
+        throw new NotFoundException('Stock not found');
+      }
+    }
   }
 
   public async getStockHistory(userId: string): Promise<StockResponseDto[]> {

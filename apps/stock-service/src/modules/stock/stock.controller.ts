@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   InternalServerErrorException,
+  NotFoundException,
   Query,
   Res,
 } from '@nestjs/common';
@@ -9,6 +11,7 @@ import { ApiResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { StockService } from './stock.service';
 import { Response } from 'express';
 import { StockDto } from '@node-challenge/dtos';
+import { pipeline } from 'stream';
 
 @Controller('stocks')
 @ApiTags('stocks')
@@ -35,6 +38,12 @@ export class StockController {
       res.status(500).send(new InternalServerErrorException().getResponse());
     });
 
-    data.pipe(res);
+    data.on('data', (data) => {
+      if (data.includes('N/D')) {
+        res.status(404).send(new NotFoundException().getResponse());
+      } else {
+        res.send(data);
+      }
+    });
   }
 }

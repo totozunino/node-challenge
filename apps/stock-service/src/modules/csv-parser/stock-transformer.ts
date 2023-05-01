@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Transform, TransformCallback } from 'stream';
 
 interface CSVStock {
