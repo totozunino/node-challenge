@@ -32,7 +32,11 @@ export class AuthService {
   public async login(loginInputDto: LoginInputDto): Promise<LoginResponseDto> {
     const { email, password } = loginInputDto;
 
-    const user = await this.userService.getUserOrThrow({ where: { email } });
+    const user = await this.userService.getUser({ where: { email } });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
     if (!(await compare(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
@@ -55,9 +59,14 @@ export class AuthService {
     refreshTokenInput: RefreshTokenInputDto,
   ): Promise<LoginResponseDto> {
     const payload = this.jwtService.decode(refreshTokenInput.refreshToken);
-    const user = await this.userService.getUserOrThrow({
+
+    const user = await this.userService.getUser({
       where: { id: payload.sub },
     });
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
 
     if (!(await compare(refreshTokenInput.refreshToken, user.refreshToken))) {
       throw new ForbiddenException('Access denied');

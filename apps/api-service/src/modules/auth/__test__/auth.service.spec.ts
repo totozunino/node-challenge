@@ -14,6 +14,7 @@ import { compare } from 'bcrypt';
 import { buildMockedUser, mockRepository } from '../../../../test/utils';
 import { MailService } from '../../../modules/mail/mail.service';
 import mailConfig from '../../../config/mail.config';
+import { UnauthorizedException } from '@nestjs/common';
 
 const chance = new Chance();
 
@@ -70,9 +71,7 @@ describe('Auth Service', () => {
 
       const token = chance.string();
 
-      mockedUserRepository.findOneOrFail.mockReturnValue(
-        Promise.resolve(mockedUser),
-      );
+      mockedUserRepository.findOne.mockReturnValue(Promise.resolve(mockedUser));
 
       (compare as jest.Mock) = jest.fn().mockReturnValue(true);
 
@@ -80,8 +79,8 @@ describe('Auth Service', () => {
 
       const result = await authService.login(input);
 
-      expect(mockedUserRepository.findOneOrFail).toHaveBeenCalledTimes(1);
-      expect(mockedUserRepository.findOneOrFail).toHaveBeenCalledWith({
+      expect(mockedUserRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.findOne).toHaveBeenCalledWith({
         where: { email: input.email },
       });
       expect(mockedUserRepository.update).toHaveBeenCalledTimes(1);
@@ -101,12 +100,12 @@ describe('Auth Service', () => {
         password: chance.string(),
       };
 
-      mockedUserRepository.findOneOrFail.mockRejectedValue(
-        new Error('User not found'),
+      mockedUserRepository.findOne.mockRejectedValue(
+        new UnauthorizedException('Invalid credentials'),
       );
 
       await expect(authService.login(input)).rejects.toThrowError(
-        'User not found',
+        'Invalid credentials',
       );
     });
 
@@ -120,9 +119,7 @@ describe('Auth Service', () => {
         email: input.email,
       });
 
-      mockedUserRepository.findOneOrFail.mockReturnValue(
-        Promise.resolve(mockedUser),
-      );
+      mockedUserRepository.findOne.mockReturnValue(Promise.resolve(mockedUser));
 
       (compare as jest.Mock) = jest.fn().mockReturnValue(false);
 
@@ -144,18 +141,17 @@ describe('Auth Service', () => {
       });
       const token = chance.string();
 
-      mockedUserRepository.findOneOrFail.mockReturnValue(
-        Promise.resolve(mockedUser),
-      );
+      mockedUserRepository.findOne.mockReturnValue(Promise.resolve(mockedUser));
 
       jwtService.sign.mockReturnValue(token);
+      jwtService.decode.mockReturnValue({ sub: userId });
 
       (compare as jest.Mock) = jest.fn().mockReturnValue(true);
 
-      const result = await authService.refreshToken(userId, input);
+      const result = await authService.refreshToken(input);
 
-      expect(mockedUserRepository.findOneOrFail).toHaveBeenCalledTimes(1);
-      expect(mockedUserRepository.findOneOrFail).toHaveBeenCalledWith({
+      expect(mockedUserRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(mockedUserRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
       });
       expect(mockedUserRepository.update).toHaveBeenCalledTimes(1);
@@ -173,15 +169,15 @@ describe('Auth Service', () => {
       const input: RefreshTokenInputDto = {
         refreshToken: chance.string(),
       };
-      const userId = chance.guid();
 
-      mockedUserRepository.findOneOrFail.mockRejectedValue(
-        new Error('User not found'),
+      jwtService.decode.mockReturnValue({ sub: chance.guid() });
+      mockedUserRepository.findOne.mockRejectedValue(
+        new UnauthorizedException(),
       );
 
-      await expect(
-        authService.refreshToken(userId, input),
-      ).rejects.toThrowError('User not found');
+      await expect(authService.refreshToken(input)).rejects.toThrowError(
+        'Unauthorized',
+      );
     });
 
     it('should throw an error if the refresh token is incorrect', async () => {
@@ -194,15 +190,14 @@ describe('Auth Service', () => {
         id: userId,
       });
 
-      mockedUserRepository.findOneOrFail.mockReturnValue(
-        Promise.resolve(mockedUser),
-      );
+      jwtService.decode.mockReturnValue({ sub: userId });
+      mockedUserRepository.findOne.mockReturnValue(Promise.resolve(mockedUser));
 
       (compare as jest.Mock) = jest.fn().mockReturnValue(false);
 
-      await expect(
-        authService.refreshToken(userId, input),
-      ).rejects.toThrowError('Access denied');
+      await expect(authService.refreshToken(input)).rejects.toThrowError(
+        'Access denied',
+      );
     });
   });
 

@@ -38,10 +38,6 @@ export class UserService {
     };
   }
 
-  public async getUserOrThrow(options: FindOneOptions<User>): Promise<User> {
-    return this.userRepository.findOneOrFail(options);
-  }
-
   public async getUser(options: FindOneOptions<User>): Promise<User> {
     return await this.userRepository.findOne(options);
   }
