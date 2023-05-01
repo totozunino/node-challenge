@@ -18,6 +18,8 @@ services:
   stock-service:
     build:
       dockerfile: ./apps/stock-service/Dockerfile
+    ports:
+      - "3001:3001"
     networks:
       - mynetwork
 
