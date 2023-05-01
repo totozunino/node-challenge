@@ -43,10 +43,9 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.OK)
   public async refreshToken(
-    @User('sub') userId: string,
     @Body() body: RefreshTokenInputDto,
   ): Promise<LoginResponseDto> {
-    return await this.authService.refreshToken(userId, body);
+    return await this.authService.refreshToken(body);
   }
 
   @ApiBearerAuth()

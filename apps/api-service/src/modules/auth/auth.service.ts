@@ -52,11 +52,11 @@ export class AuthService {
   }
 
   public async refreshToken(
-    userId: string,
     refreshTokenInput: RefreshTokenInputDto,
   ): Promise<LoginResponseDto> {
+    const payload = this.jwtService.decode(refreshTokenInput.refreshToken);
     const user = await this.userService.getUserOrThrow({
-      where: { id: userId },
+      where: { id: payload.sub },
     });
 
     if (!(await compare(refreshTokenInput.refreshToken, user.refreshToken))) {
