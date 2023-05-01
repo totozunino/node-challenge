@@ -20,6 +20,12 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   public refreshToken: string;
 
+  @Column({ nullable: true })
+  public resetPasswordToken: string;
+
+  @Column({ nullable: true })
+  public resetPasswordExpires: Date;
+
   @OneToMany(() => StockHistory, (stockHistory) => stockHistory.user, {
     eager: false,
   })

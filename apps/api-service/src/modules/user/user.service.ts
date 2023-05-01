@@ -56,6 +56,38 @@ export class UserService {
     );
   }
 
+  public async updateRecoveryPassword(
+    userId: string,
+    resetPasswordToken: string,
+    resetPasswordExpires: Date,
+  ): Promise<void> {
+    await this.userRepository.update(
+      { id: userId },
+      {
+        resetPasswordToken: resetPasswordToken,
+        resetPasswordExpires: resetPasswordExpires,
+      },
+    );
+  }
+
+  public async updateResetPassword(
+    userId: string,
+    resetPasswordToken: string,
+    resetPasswordExpires: Date,
+    password: string,
+  ): Promise<void> {
+    const hashedPassword = await this.hashPassword(password);
+
+    await this.userRepository.update(
+      { id: userId },
+      {
+        resetPasswordToken: resetPasswordToken,
+        resetPasswordExpires: resetPasswordExpires,
+        password: hashedPassword,
+      },
+    );
+  }
+
   private async getUserByEmail(email: string): Promise<User> {
     return this.userRepository.findOne({
       where: {
@@ -70,13 +102,19 @@ export class UserService {
   }> {
     const password = crypto.randomBytes(16).toString('hex');
 
-    const saltRounds = 10;
-    const salt = await genSalt(saltRounds);
-    const hashedPassword = await hash(password, salt);
+    const hashedPassword = await this.hashPassword(password);
 
     return {
       password,
       hash: hashedPassword,
     };
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    const saltRounds = 10;
+    const salt = await genSalt(saltRounds);
+    const hashedPassword = await hash(password, salt);
+
+    return hashedPassword;
   }
 }

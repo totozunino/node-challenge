@@ -9,6 +9,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ConfigType } from '@nestjs/config';
 import authConfig from 'src/config/auth.config';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import authConfig from 'src/config/auth.config';
       useFactory: (config: ConfigType<typeof authConfig>) => config,
       inject: [authConfig.KEY],
     }),
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [

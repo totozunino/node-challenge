@@ -8,7 +8,11 @@ import {
 import {
   LoginInputDto,
   LoginResponseDto,
+  PasswordRecoveryInputDto,
+  PasswordRecoveryResponseDto,
   RefreshTokenInputDto,
+  ResetPasswordInputDto,
+  ResetPasswordResponseDto,
 } from '@node-challenge/dtos';
 import { AuthService } from './auth.service';
 import { Public, User } from './decorators';
@@ -54,5 +58,30 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   public async logout(@User('sub') userId: string): Promise<void> {
     await this.authService.logout(userId);
+  }
+
+  @Public()
+  @Post('/password-recovery')
+  @ApiOperation({
+    summary: 'Password recovery',
+    description: 'Send password recovery email',
+  })
+  public async recoverPassword(
+    @Body() body: PasswordRecoveryInputDto,
+  ): Promise<PasswordRecoveryResponseDto> {
+    const { email } = body;
+    const token = await this.authService.sendPasswordRecoveryEmail(email);
+    return { message: 'Password recovery email sent', token };
+  }
+
+  @Public()
+  @Post('/reset-password')
+  @ApiOperation({ summary: 'Reset password', description: 'Reset password' })
+  public async resetPassword(
+    @Body() body: ResetPasswordInputDto,
+  ): Promise<ResetPasswordResponseDto> {
+    const { token, password } = body;
+    await this.authService.resetPassword(token, password);
+    return { message: 'Password reset successfully' };
   }
 }
