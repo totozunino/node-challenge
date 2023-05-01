@@ -1,6 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { StockHistory } from '../../entities';
+import { Stock, StockHistory } from '../../entities';
 import { Repository } from 'typeorm';
 import axios from 'axios';
 import {
@@ -17,6 +17,8 @@ export class StockService {
   constructor(
     @InjectRepository(StockHistory)
     private readonly stockHistoryRepository: Repository<StockHistory>,
+    @InjectRepository(Stock)
+    private readonly stockRepository: Repository<Stock>,
     @Inject(stockServiceConfig.KEY)
     private readonly stockServiceConfiguration: ConfigType<
       typeof stockServiceConfig
@@ -43,27 +45,29 @@ export class StockService {
       throw new UnauthorizedException();
     }
 
-    const stock = this.stockHistoryRepository.create({
+    const stock = await this.findOrCreateStock(data.symbol, data.name);
+
+    const newStockHistory = this.stockHistoryRepository.create({
       close: data.close,
       high: data.high,
       low: data.low,
-      name: data.name,
       open: data.open,
-      symbol: data.symbol,
       date: new Date(data.date + ' ' + data.time),
-      user: user,
+      user,
+      stock,
     });
 
-    const { name, symbol, open, high, low, close } =
-      await this.stockHistoryRepository.save(stock);
+    const stockHistory = await this.stockHistoryRepository.save(
+      newStockHistory,
+    );
 
     return {
-      name,
-      symbol,
-      open,
-      high,
-      low,
-      close,
+      name: stockHistory.stock.name,
+      symbol: stockHistory.stock.symbol,
+      open: stockHistory.open,
+      high: stockHistory.high,
+      low: stockHistory.low,
+      close: stockHistory.close,
     };
   }
 
@@ -77,33 +81,48 @@ export class StockService {
       order: {
         createdAt: 'DESC',
       },
+      relations: ['stock'],
     });
 
-    return stockHistory.map((stock) => ({
-      createdAt: stock.createdAt,
+    return stockHistory.map(({ createdAt, stock, open, high, low, close }) => ({
+      createdAt,
       name: stock.name,
       symbol: stock.symbol,
-      open: stock.open,
-      high: stock.high,
-      low: stock.low,
-      close: stock.close,
+      open,
+      high,
+      low,
+      close,
     }));
   }
 
   public async getStockStats(): Promise<StockStatsResponseDto[]> {
     const stockStats = await this.stockHistoryRepository
       .createQueryBuilder('sh')
-      .select('sh.symbol')
-      .addSelect('count(sh.symbol) as count')
-      .groupBy('sh.symbol')
+      .select('s.symbol', 'symbol')
+      .addSelect('count(sh.stockId)', 'count')
+      .innerJoin('sh.stock', 's')
+      .groupBy('sh.stockId')
       .limit(5)
       .getRawMany();
 
-    return stockStats.map((stock) => {
-      return {
-        stock: stock.sh_symbol,
-        timesRequested: stock.count,
-      };
-    });
+    return stockStats.map(({ symbol, count }) => ({
+      stock: symbol,
+      timesRequested: count,
+    }));
+  }
+
+  private async findOrCreateStock(
+    symbol: string,
+    name: string,
+  ): Promise<Stock> {
+    const stock = await this.stockRepository.findOne({ where: { symbol } });
+
+    if (stock) {
+      return stock;
+    }
+
+    const newStock = this.stockRepository.create({ symbol, name });
+
+    return await this.stockRepository.save(newStock);
   }
 }

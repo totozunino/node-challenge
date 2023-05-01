@@ -34,7 +34,7 @@ export class AuthController {
     return await this.authService.login(body);
   }
 
-  @ApiBearerAuth()
+  @Public()
   @Post('/refresh-token')
   @ApiResponse({ type: LoginResponseDto })
   @ApiOperation({
